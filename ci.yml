@@ -5,16 +5,16 @@ on:
       - master
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@master
+  runs-on: ubuntu-latest
+  steps:
 
-    - name: vuepress-deploy
-      uses: jenkey2011/vuepress-deploy@master
-      env:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        TARGET_REPO: username/repo
-        TARGET_BRANCH: page
-        BUILD_SCRIPT: npm install && npm run build
-        BUILD_DIR: dist/
+    - name: Checkout
+    uses: actions/checkout@v1
+
+    - name: Build and Deploy
+    uses: JamesIves/github-pages-deploy-action@releases/v2
+    env:
+    ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+    BRANCH: page
+    FOLDER: docs
+    BUILD_SCRIPT: npm install && npm run build:es && npm run demo:build
