@@ -1,11 +1,15 @@
 name: vant-encapsulation-page
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 jobs:
   build-and-deploy:
   runs-on: ubuntu-latest
   steps:
 
-    - name: Checkout
+    - name: qwer630701
     uses: actions/checkout@v1
 
     - name: Build and Deploy
