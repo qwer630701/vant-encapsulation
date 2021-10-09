@@ -1,7 +1,9 @@
 name: GitHub pages deploy
 
-on:
-  push
+on: 
+  push:
+    branches:
+      - main
 jobs:
   deploy-gh-pages:
     runs-on: ubuntu-latest
