@@ -1,6 +1,6 @@
 name: vant-encapsulation-page
 on: 
-  push
+  [push]
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -14,5 +14,5 @@ jobs:
       env:
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         BRANCH: page
-        FOLDER: docs
-        BUILD_SCRIPT: npm install && npm run build:es && npm run demo:build
+        FOLDER: dist
+        BUILD_SCRIPT: npm install && npm run build
