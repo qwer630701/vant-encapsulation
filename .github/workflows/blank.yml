@@ -31,7 +31,7 @@ jobs:
         uses: canastro/copy-file-action@master
         with:
           source: "dist/index.html"
-          target: "404.html"
+          target: "dist/404.html"
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.3
