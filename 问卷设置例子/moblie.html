@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
+    <title>Document</title>
+    <style>
+        * {margin: 0;padding: 0;}
+    </style>
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+    <div class="layui-form" id="questionnaire"></div>
+    <button type="button" class="layui-btn layui-btn-fluid" onClick="getQuestionData()">提交</button>
+    <script id="questionnaireTpl" type="text/html">
+        {{#  layui.each(d, function(index, item){ }}
+            {{# if(item.visible){ }}
+            <div class="item {{# if(item.is_required){ }}required{{# } }}" data-index="{{index}}">
+                <div class="title">问题{{ (index + 1) }}:{{ item.title }}</div>
+                {{# if(item.option_type == 11){ }}
+                <div class="layui-form-item" style="margin:0">
+                    <div class="layui-input-block" style="margin:10px 0 0">
+                        <input type="text" class="layui-input"/>
+                    </div>
+                </div>
+                {{# }else{ }}
+                    {{#  layui.each(item.option_detail, function(dIndex, dItem){ }}
+                        {{# if(item.option_type == 1){ }}
+                        <p>
+                            <input type="radio" name="radio_{{item.id}}" value="nan" title="{{dItem.title}}" lay-filter="q_radio" 
+                            {{# if(dItem.id == item.value){ }} checked {{# } }}>
+                        </p>
+                        {{# }else if(item.option_type == 2){ }}
+                        <p>
+                            <input type="checkbox" name="checkbox_{{dItem.id}}" title="{{dItem.title}}" lay-filter="q_checkbox" lay-skin="primary"
+                            {{# if(item.value.split(',').indexOf(dItem.id.toString()) > -1){ }} checked {{# } }}>
+                        </p>
+                        {{# } }}
+                    {{# }) }}
+                {{# } }}
+            </div>
+            {{# } }}
+        {{# }) }}
+    </script>
+    <script src="layui/layui.js"></script>
+    <script src="jquery.min.js"></script>
+    <script>
+        var questionData = [
+            {
+            id: 1,
+            title: "问题1",
+            value: "",
+            is_required: true,
+            option_type: "1",
+            option_detail: [
+                {
+                    id: 11,
+                    title:
+                        "问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2问题2",
+                    goto: 2
+                },
+                {
+                id: 12,
+                title: "跳问题4",
+                goto: 4,
+                gotoIndex: 3,
+                relation: 0,
+                relationIndex: -1
+                },
+                {
+                id: 13,
+                title: "跳问题3",
+                goto: 3,
+                gotoIndex: 2,
+                relation: 0,
+                relationIndex: -1
+                }
+            ]
+            },
+            {
+            id: 2,
+            title: "问题2",
+            value: "",
+            is_required: false,
+            option_type: "11"
+            },
+            {
+            id: 3,
+            title: "问题3",
+            value: "",
+            is_required: false,
+            option_type: "2",
+            option_detail: [
+                {
+                id: 31,
+                title: "跳问题6",
+                goto: 6,
+                gotoIndex: 5,
+                relation: 0,
+                relationIndex: -1
+                },
+                {
+                id: 32,
+                title: "跳问题6",
+                goto: 6,
+                gotoIndex: 5,
+                relation: 0,
+                relationIndex: -1
+                }
+            ]
+            },
+            {
+            id: 4,
+            title: "问题4",
+            value: "",
+            option_type: "1",
+            option_detail: [
+                {
+                id: 41,
+                title: "问题5",
+                goto: 0,
+                gotoIndex: -1,
+                relation: 0,
+                relationIndex: -1
+                },
+                {
+                id: 42,
+                title: "关联问题5",
+                goto: 0,
+                gotoIndex: -1,
+                relation: 5,
+                relationIndex: 4
+                }
+            ]
+            },
+            {
+            id: 5,
+            title: "问题5",
+            value: "",
+            option_type: "2",
+            option_detail: [
+                {
+                id: 41,
+                title: "问题6",
+                goto: 0,
+                gotoIndex: -1,
+                relation: 0,
+                relationIndex: -1
+                },
+                {
+                id: 42,
+                title: "问题8",
+                goto: 0,
+                gotoIndex: -1,
+                relation: 0,
+                relationIndex: -1
+                }
+            ]
+            },
+            {
+            id: 6,
+            title: "问题6",
+            value: "",
+            option_type: "2",
+            option_detail: [
+                {
+                id: 41,
+                title: "问题6",
+                goto: 0,
+                gotoIndex: -1,
+                relation: 0,
+                relationIndex: -1
+                },
+                {
+                id: 42,
+                title: "问题8",
+                goto: 0,
+                gotoIndex: -1,
+                relation: 0,
+                relationIndex: -1
+                }
+            ]
+            },
+            {
+            id: 7,
+            title: "问题7",
+            value: "",
+            option_type: "2",
+            option_detail: [
+                {
+                id: 41,
+                title: "问题6",
+                goto: 0,
+                gotoIndex: -1,
+                relation: 0,
+                relationIndex: -1
+                },
+                {
+                id: 42,
+                title: "问题8",
+                goto: 0,
+                gotoIndex: -1,
+                relation: 0,
+                relationIndex: -1
+                }
+            ]
+            }
+        ];
+
+        layui.use(['element', 'laytpl', 'form'], function () {
+            element = layui.element;
+            laytpl = layui.laytpl;
+            form = layui.form;
+
+            questionDataInit()
+
+            form.on('radio(q_radio)', function(data){
+                var elem = $(data.elem);
+                var itemIndex = elem.closest('.item').attr('data-index');
+                var detailIndex = elem.closest('p').index() - 1;
+                var row = questionData[itemIndex]
+                var rowItem = row.option_detail[detailIndex]
+                row.value = rowItem.id;
+                questionUpdate();
+            });
+            form.on('checkbox(q_checkbox)', function(data){
+                var elem = $(data.elem);
+                var itemIndex = elem.closest('.item').attr('data-index');
+                var detailIndex = elem.parent('p').index() - 1;
+                var row = questionData[itemIndex]
+                var rowItem = row.option_detail[detailIndex]
+                var isChecked = elem.is(":checked")
+                if(row.value == ""){
+                    row.value = rowItem.id.toString();
+                }else{
+                    var value = row.value.toString().split(',')
+                    var index = value.indexOf(rowItem.id.toString());
+                    if(index > -1){
+                        value.splice(index,1)
+                    }else{
+                        value.push(rowItem.id.toString())
+                    }
+                    value = value.join(',')
+                    row.value = value;
+                }
+                questionUpdate()
+            });
+
+            function questionUpdate(){
+                for(var i=0;i<questionData.length;i++){
+                    var item = questionData[i].visible = true;
+                }
+                for(var i=0;i<questionData.length;i++){
+                    var item = questionData[i];
+                    if(item.visible != false)item.visible = true;
+                    if(item.option_type != 11){
+                        for(var j=0;j<item.option_detail.length;j++){
+                            var dItem = item.option_detail[j]
+                            if(dItem.relationIndex > -1){
+                                questionData[dItem.relationIndex].visible = false;
+                            }
+                        }
+                    }
+                }
+
+                for(var i=0;i<questionData.length;i++){
+                    var item = questionData[i];
+                    var value = item.value
+                    if(item.option_type != 11 && value != "" && item.visible){
+                        if(item.option_type == 1){
+                            for(var j=0;j<item.option_detail.length;j++){
+                                var dItem = item.option_detail[j]
+                                if(dItem.id == value){
+                                    if(dItem.gotoIndex > -1){
+                                        for(var x=i+1;x<dItem.gotoIndex;x++){
+                                            questionData[x].visible = false
+                                        }
+                                    }
+                                    if(dItem.relationIndex > -1){
+                                        questionData[dItem.relationIndex].visible = true;
+                                    }
+                                    break;
+                                }
+                            }
+                        }else{
+                            for(var j=0;j<item.option_detail.length;j++){
+                                var dItem = item.option_detail[j]
+                                if(value.split(',').indexOf(dItem.id.toString()) > -1){
+                                    if(dItem.relationIndex > -1){
+                                        questionData[dItem.relationIndex].visible = true;
+                                    }
+                                }
+                                if(j==0 && value != ""){
+                                    for(var x=i+1;x<dItem.gotoIndex;x++){
+                                        questionData[x].visible = false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                questionRender()
+            }
+
+            function questionDataInit(){
+                for(var i=0;i<questionData.length;i++){
+                    var item = questionData[i];
+                    item.value = ""
+                    if(item.visible != false)item.visible = true;
+                    if(item.option_type != 11){
+                        for(var j=0;j<item.option_detail.length;j++){
+                            var dItem = item.option_detail[j]
+                            dItem.id = dItem.id.toString()
+                            if(dItem.relationIndex > -1){
+                                questionData[dItem.relationIndex].visible = false;
+                            }
+                        }
+                    }
+                }
+                questionRender();
+            }
+
+            function questionRender() {
+                var getTpl = questionnaireTpl.innerHTML,
+                    view = document.getElementById('questionnaire');
+                laytpl(getTpl).render(questionData, function (html) {
+                    view.innerHTML = html;
+                    form.render();
+                });
+            }
+        })
+
+        function getQuestionData(){
+            var data = $.extend(true,[],questionData)
+            for(var i=0,j=0;i<data.length;i++,j++){
+                var item = data[i]
+                if(item.visible == false){
+                    data.splice(i,1)
+                    i--
+                    continue;
+                }
+                if(item.is_required && item.value == ""){
+                    layer.msg("请完善填写问题" + (j+1))
+                    return false;
+                }
+            }
+            console.log(data)
+            return data;
+        }
+    </script>
+</body>
+
+</html>

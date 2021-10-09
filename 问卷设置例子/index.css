@@ -1,0 +1,82 @@
+.container{width:1000px;margin:10px auto;border:1px solid #ccc;height:calc(100vh - 30px);overflow:auto;box-sizing: border-box;}
+
+
+.question .item,.questionRelationDetail .item{
+    padding:20px 40px 0;
+    border:1px solid #ccc;
+    border-width:0 0 1px 0
+}
+
+.question .item .title,.questionRelationDetail .item .title{
+    padding:10px 0;
+    font-size:20px;
+    font-weight: bold;
+    position: relative;
+}
+
+.question .item .title i,.questionRelationDetail .item .title i{
+    position: absolute;
+    left: -20px;
+    top: 15px;
+    color:red;
+}
+
+.question .item .layui-form-checkbox,.questionRelationDetail .item .layui-form-checkbox{
+    padding-top:8px;
+    padding-bottom:8px;
+    color:#333;
+}
+
+.question .layui-checkbox-disbaled[lay-skin=primary] span,#question .layui-disabled, .layui-disabled:hover,
+.questionRelationDetail .layui-checkbox-disbaled[lay-skin=primary] span,.questionRelationDetail .layui-disabled, .layui-disabled:hover{
+    color:#333 !important;
+}
+
+.layui-form-checkbox[lay-skin=primary] i{
+    top:10px;
+}
+
+.layui-select-disabled .layui-disabled{
+    color:#333 !important;
+}
+
+.layui-checkbox-disbaled span{
+    background-color: #5FB878 !important;
+}
+
+.layui-form-checked i, .layui-form-checked:hover i{
+    color: #5FB878 !important;
+}
+
+.operation{
+    visibility:hidden;
+    margin:10px 0;
+}
+
+.operation .operation-group{
+    float:right;
+}
+
+.question .item.itemHover .operation{
+    visibility: initial;
+}
+
+.btn{text-align: center;margin-top:20px;}
+
+.btn .add{width:400px;text-align: center;}
+
+.edit.layui-form{
+    height:100%;
+    padding:20px 10px;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+.edit.layui-form .layui-btn{
+    line-height:38px;height:38px
+}
+
+
+.layui-layer .layui-form-selected dl{
+    max-width:200px;
+}

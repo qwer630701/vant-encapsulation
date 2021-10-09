@@ -1,0 +1,2 @@
+如果 style-resources-loader 安装失败
+vue add style-resources-loader

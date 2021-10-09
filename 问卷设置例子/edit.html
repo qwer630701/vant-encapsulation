@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{margin:0;padding:0;}
+    </style>
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="question layui-form" id="questionEdit"></div>
+    <div class="btn">
+        <button type="button" class="submit layui-btn layui-btn-normal">确认</button>
+    </div>
+    <script id="questionEditTpl" type="text/html">
+        <div class="edit layui-form" style="overflow: initial;">
+            <input type="hidden" id="id" name="id"/>
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="option_type">类型</label>
+                <div class="layui-input-inline">
+                    <select id="option_type" name="option_type" lay-filter="option_type" lay-verify="required" lay-required-msg="请选择类型" value="{{d.option_type}}">
+                        <option value="1">单选</option>
+                        <option value="2">多选</option>
+                        <option value="11">填空</option>
+                    </select>
+                </div>
+                <input type="checkbox" id="is_required" name="is_required" value="" title="是否必填" {{# if(d.is_required){ }} checked {{# } }} >
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="title">标题</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" id="title" name="title" lay-verify="required" value="{{d.title}}" lay-required-msg="请输入标题" placeholder="请输入标题"/>
+                </div>
+            </div>
+            <div id="questionDetail"></div>
+        </div>
+    </script>
+    <script id="questionDetailTpl" type="text/html">
+        {{# if(d.option_type == 11){ }}
+        {{# }else{ }}
+            <table class="layui-table questionDetailTable">
+                <thead>
+                    <tr>
+                        <th>选项</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#  layui.each(d.option_detail, function(index, item){ }}
+                    <tr>
+                        <td>
+                            <input type="text" class="layui-input" name="title" value="{{item.title}}" lay-verify="required" lay-required-msg="请输入选项" placeholder="请输入选项"/>
+                            <input type="hidden" name="detailId" value="{{item.id}}"/>
+                        </td>
+                        <td width="220">
+                            <button type="button" class="detailAdd layui-btn layui-btn-sm">添加</button>
+                            <button type="button" class="detailDelete layui-btn layui-btn-sm">删除</button>
+                            <button type="button" class="detailMoveUp layui-btn layui-btn-sm">上移</button>
+                            <button type="button" class="detailMoveDown layui-btn layui-btn-sm">下移</button>
+                        </td>
+                    </tr>
+                    {{# }) }}
+                </tbody>
+            </table>
+        {{# } }}
+    </script>
+    <script src="layui/layui.js"></script>
+    <script src="jquery.min.js"></script>
+    <script>
+        var editIndex = -1;
+        var editData = {
+            id:0,
+            title:"喜欢什么手机",//标题
+            option_type:"1",//问题类型
+            is_required:true,//是否必填
+            option_detail:[
+                {
+                    id:0,
+                    title:"小米",//标题
+                    relation:0,//关联id
+                    relationIndex:2,//关联索引
+                    goto:0,//跳题id
+                    gotoIndex:-1,//跳题索引
+                },
+                {id:0,title:"华为",relation:0,relationIndex:3,goto:0,gotoIndex:-1},
+            ]
+        }
+
+        layui.use(['element','laytpl','form'], function () {
+            element = layui.element;
+            laytpl = layui.laytpl;
+            form = layui.form;
+
+            questionEditTplRender()
+
+            form.on('select(option_type)', function(data){
+                editData.option_type = data.value;
+                if(data.value == 11){
+                    editData.detail = "";
+                    editData.option_detail = []
+                }else{
+                    editData.option_detail = [
+                        {id:0,title:"选项",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                        {id:0,title:"选项",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                    ]
+                }
+                questionDetailTplRender();
+            });
+
+            $(document).on('blur','#questionDetail .layui-input',function(){
+                var index = $(this).closest('tr').index()
+                var val = $(this).val();
+                editData.option_detail[index].title = val;
+            })
+
+            $(document).on('blur','#questionDetail .layui-input',function(){
+                var index = $(this).closest('tr').index()
+                var val = $(this).val();
+                editData.option_detail[index].title = val;
+            })
+
+            $(document).on('blur','#title',function(){
+                var val = $(this).val();
+                editData.title = val;
+            })
+
+            $(document).on('click','#questionDetail .detailAdd',function(){
+                var index = $(this).closest('tr').index()
+                editData.option_detail.splice(index + 1, 0,{id:0,title:"选项",relation:0,relationIndex:-1,goto:0,gotoIndex:editData.option_detail[index].gotoIndex});
+                questionDetailTplRender();
+            })
+
+            $(document).on('click','#questionDetail .detailDelete',function(){
+                var index = $(this).closest('tr').index()
+                if(editData.option_detail.length == 1){
+                    layer.msg("唯一选项不能删除")
+                    return false;
+                }
+                editData.option_detail.splice(index, 1);
+                questionDetailTplRender();
+            })
+            
+            $(document).on('click','#questionDetail .detailMoveUp',function(){
+                var index = $(this).closest('tr').index()
+                var rows = editData.option_detail
+                if(index != 0){
+                    rows[index] = rows.splice(index-1, 1, rows[index])[0];
+                }else{
+                    rows.push(rows.shift());
+                }
+                questionDetailTplRender();
+            })
+
+            $(document).on('click','#questionDetail .detailMoveDown',function(){
+                var index = $(this).closest('tr').index()
+                var rows = editData.option_detail
+                if(index!=editData.length-1){
+                    rows[index] = rows.splice(index+1, 1, rows[index])[0];
+                }else{
+                    rows.unshift( rows.splice(index,1)[0]);
+                }
+                questionDetailTplRender();
+            })
+
+
+            function questionEditTplRender(callback){
+                var getTpl = questionEditTpl.innerHTML,
+                view = document.getElementById('questionEdit');
+                laytpl(getTpl).render(editData, function(html){
+                    view.innerHTML = html;
+                    questionDetailTplRender()
+                });
+            }
+
+            function questionDetailTplRender(){
+                var getTpl = questionDetailTpl.innerHTML,
+                view = document.getElementById('questionDetail');
+                laytpl(getTpl).render(editData, function(html){
+                    view.innerHTML = html;
+                    form.render();
+                });
+            }
+        });
+
+
+        $('.submit').on('click',function(){
+            console.log(editData)
+        })
+    </script>
+</body>
+
+</html>

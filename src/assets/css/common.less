@@ -1,0 +1,138 @@
+
+/*
+* 全局公共样式
+*/
+html,body,ul,p,h1,h2,h3,h4,h5{padding:0;margin:0;}
+*, *:after, *:before {-webkit-box-sizing: border-box;-moz-box-sizing: border-box; box-sizing: border-box; }
+
+li{list-style: none;}
+a{text-decoration:none;display:inline-block;color:@fontColor;}
+a:focus,button:focus ,input:focus,textarea:focus {outline:none;}
+
+body {
+  // -webkit-touch-callout: none !important; /*当触摸并按住触摸目标时，禁止系统默认菜单。*/
+  height: 100%;
+}
+em{
+	font: inherit;
+}
+
+html,body{
+	width:100%;
+  height:100%;
+  overflow:hidden;
+}
+
+body {
+    // max-width: 540px;
+    // min-width: 320px;
+    margin: 0 auto;
+    font-size:16px;
+    color:@fontColor;
+}
+
+.content{
+  height:100vh;
+  box-sizing: border-box;
+  overflow: auto;
+}
+// body:-webkit-scrollbar{display:none;}
+table{
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.flex{
+	display:flex;
+}
+
+.clearfix:after {       
+	content: ".";    
+	display: block;  
+	clear: both;    
+	visibility: hidden;      
+	line-height: 0;   
+	height: 0;    
+	font-size:0;    
+}
+
+.ellipsis{
+	overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.scroll-hidden::-webkit-scrollbar{display:none;}
+
+p,div{
+  margin: 0;
+}
+
+.tl{
+  text-align: left;
+}
+
+.tr{
+  text-align: right;
+}
+
+.fl{
+  float:left;
+}
+
+.fr{
+  float:right;
+}
+
+.fluid{
+  width:100%;
+}
+
+.container{
+  width: 100%;
+  background: @white;
+}
+
+.flex{
+  display: flex;
+}
+
+.flex-item{
+  flex: 1;
+}
+
+.van-picker{
+  height:100%;
+  overflow:hidden;
+}
+
+.describe{
+  margin: 0;
+  padding: 16px 16px 16px;
+  color: @gray;
+  font-size: @fontSizeSm;
+  line-height: 16px;
+}
+
+.button-fluid{
+  padding:0 15px;
+  margin:10px 0;
+  .van-button  + .van-button {
+    margin:10px 0 !important;
+  }
+}
+
+.required::before{
+  position: absolute;
+  left: -8px;
+  color: @red;
+  font-size: @fontSizeXs;
+  content: '*';
+}
+
+.navbar.fixed + .container{
+  padding-top:46px;
+  // overflow: hidden;
+  // overflow-y: auto;
+  box-sizing: border-box;
+  height:100%;
+}

@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{margin:0;padding:0;}
+    </style>
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="question layui-form" id="question"></div>
+        <div class="btn">
+            <button type="button" class="export layui-btn layui-btn-lg">导入</button>
+            <button type="button" class="add layui-btn layui-btn-lg layui-btn-normal">新增</button>
+        </div>
+    </div>
+    <script id="questionTpl" type="text/html">
+        {{#  layui.each(d, function(index, item){ }}
+            <div class="item">
+                <div class="title">
+                    {{ index+1 }}: {{ item.title }}
+                    {{# if(item.is_required){ }}
+                    <i>*</i>
+                    {{# } }}
+                </div>
+                {{# if(item.option_type == 11){ }}
+                <div class="layui-input-block" style="margin: 10px 0;">
+                    <input type="text" class="layui-input" disabled/>
+                </div>
+                {{# }else{ }}
+                    {{#  layui.each(item.option_detail, function(dIndex, dItem){ }}
+                    <div>
+                        {{# if(item.option_type == 1){ }}
+                            <input type="radio" name="" title="{{dItem.title}}" disabled lay-skin="primary">
+                        {{# }else if(item.option_type == 2){ }}
+                            <input type="checkbox" name="" title="{{dItem.title}}" disabled lay-skin="primary">
+                        {{# } }}
+                        {{# if(dItem.relationIndex > -1){ }}
+                            <p style="color:red;">( 关联 ) 问题{{(Number(dItem.relationIndex) + 1)}}: {{templateData[dItem.relationIndex].title}}</p>
+                        {{# } }}
+                        {{# if(dItem.gotoIndex > -1){ }}
+                            <p style="color:red;">( 跳题 ) 问题{{(Number(dItem.gotoIndex) +1) }}: {{templateData[dItem.gotoIndex].title}}</p>
+                        {{# } }}
+                    </div>
+                    {{# }) }}
+                {{# } }}
+                <div class="operation" data-index="{{index}}">
+                    <button type="button" class="add layui-btn layui-btn-sm">在此题后插入问题</button>
+                    <div class="operation-group">
+                        {{# if(item.id > 0){ }}
+                        <button type="button" class="cancelRelation layui-btn layui-btn-sm">取消关联</button>
+                        {{# } }}
+                        <button type="button" class="relation layui-btn layui-btn-sm">关联题库</button>
+                        <button type="button" class="edit layui-btn layui-btn-sm">编辑</button>
+                        <button type="button" class="delete layui-btn layui-btn-sm">删除</button>
+                        <button type="button" class="moveUp layui-btn layui-btn-sm">上移</button>
+                        <button type="button" class="moveDown layui-btn layui-btn-sm">下移</button>
+                    </div>
+                </div>
+            </div>
+        {{# }) }}
+    </script>
+    <script id="questionRelationTpl" type="text/html">
+        <div class="edit layui-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="option_type">关联问题</label>
+                <div class="layui-input-inline">
+                    <select id="relation" name="relation" lay-filter="relation" lay-verify="required" lay-required-msg="请选择类型">
+                        <option value="">请选择关联问题</option>
+                        {{#  layui.each(questionBank, function(dIndex, dItem){ }}
+                            <option value="{{dItem.id}}" {{# if(d.id && d.id > 0 && d.id == dItem.id){ }} selected {{# } }}>{{dItem.title}}</option>
+                        {{# }) }}
+                    </select>
+                </div>
+            </div>
+            <div id="questionRelationDetail" class="questionRelationDetail"></div>
+        </div>
+    </script>
+    <script id="questionRelationDetailTpl" type="text/html">
+        <div class="item" style="border:none;">
+            {{# if(d.id && d.id > 0){ }}
+                <div class="title">
+                    {{ d.title }}
+                    {{# if(d.is_required){ }}
+                    <i>*</i>
+                    {{# } }}
+                </div>
+                {{# if(d.option_type == 11){ }}
+                <div class="layui-input-block" style="margin: 10px 0;">
+                    <input type="text" class="layui-input" disabled/>
+                </div>
+                {{# }else{ }}
+                    {{#  layui.each(d.option_detail, function(dIndex, dItem){ }}
+                    <div>
+                        {{# if(d.option_type == 1){ }}
+                            <input type="radio" name="" title="{{dItem.title}}" disabled lay-skin="primary">
+                        {{# }else if(d.option_type == 2){ }}
+                            <input type="checkbox" name="" title="{{dItem.title}}" disabled lay-skin="primary">
+                        {{# } }}
+                    </div>
+                    {{# }) }}
+                {{# } }}
+            {{# } }}
+        </div>
+    </script>
+    <script id="questionEditTpl" type="text/html">
+        <div class="edit layui-form">
+            <input type="hidden" id="id" name="id"/>
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="option_type">类型</label>
+                <div class="layui-input-inline">
+                    <select id="option_type" name="option_type" lay-filter="option_type" lay-verify="required" lay-required-msg="请选择类型" value="{{d.option_type}}" {{# if(d.id > 0){ }} disabled {{# } }}>
+                        <option value="1">单选</option>
+                        <option value="2">多选</option>
+                        <option value="11">填空</option>
+                    </select>
+                </div>
+                <input type="checkbox" id="is_required" name="is_required" value="" title="是否必填" {{# if(d.id > 0){ }} disabled {{# } }} {{# if(d.is_required){ }} checked {{# } }} >
+                <button type="button" class="contactItem layui-btn layui-btn-sm">题目关联</button>
+                <button type="button" class="jumpItem layui-btn layui-btn-sm">跳题关联</button>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="title">标题</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" id="title" name="title" lay-verify="required" value="{{d.title}}" lay-required-msg="请输入标题" placeholder="请输入标题" {{# if(d.id > 0){ }} disabled {{# } }}/>
+                </div>
+            </div>
+            <div id="questionDetail"></div>
+        </div>
+    </script>
+    <script id="questionDetailTpl" type="text/html">
+        {{# if(d.option_type == 11){ }}
+        {{# }else{ }}
+            <table class="layui-table questionDetailTable">
+                <thead>
+                    <tr>
+                        <th>选项</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#  layui.each(d.option_detail, function(index, item){ }}
+                    <tr>
+                        <td>
+                            <input type="text" class="layui-input" name="title" value="{{item.title}}" lay-verify="required" lay-required-msg="请输入选项" placeholder="请输入选项" {{# if(d.id > 0){ }} disabled {{# } }} />
+                            <input type="hidden" name="detailId" value="{{item.id}}"/>
+                        </td>
+                        <td width="220">
+                            {{# if(d.id > 0){ }}
+                            <button type="button" class="detailAdd layui-btn layui-btn-sm">添加</button>
+                            <button type="button" class="detailDelete layui-btn layui-btn-sm">删除</button>
+                            <button type="button" class="detailMoveUp layui-btn layui-btn-sm">上移</button>
+                            <button type="button" class="detailMoveDown layui-btn layui-btn-sm">下移</button>
+                            {{# } }}
+                        </td>
+                    </tr>
+                    {{# }) }}
+                </tbody>
+            </table>
+        {{# } }}
+    </script>
+    <script id="detailContactTpl" type="text/html">
+        <div class="layui-form" style="padding:20px 40px 20px 0">
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="option_type">当前题目</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" name="title" disabled value="{{editData.title}}"/>
+                </div>
+            </div>
+            <table class="layui-table questionDetailTable" style="margin-left:20px">
+                <thead>
+                    <tr>
+                        <th>选项</th>
+                        <th>关联题目</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#  layui.each(editData.option_detail, function(index, item){ }}
+                    <tr>
+                        <td>{{item.title}}</td>
+                        <td width="220">
+                            <select class="targetItem" name="targetItem">
+                                <option value="-1" {{# if(item.relationIndex){ }} selected  {{# } }}>请选择关联题目</option>
+                                {{#  layui.each(d, function(dIndex, dItem){ }}
+                                <option value="{{dItem.index}}" {{# if(item.relationIndex == dItem.index){ }} selected  {{# } }}>{{(dItem.index+1)}}: {{dItem.title}}</option>
+                                {{# }) }}
+                            </select>
+                        </td>
+                    </tr>
+                    {{# }) }}
+                </tbody>
+            </table>
+        </div>
+    </script>
+    <script id="detailJumpItemTpl" type="text/html">
+        <div class="layui-form" style="padding:20px 40px 20px 0">
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="option_type">当前题目</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" name="title" disabled value="{{editData.title}}"/>
+                </div>
+            </div>
+            <table class="layui-table questionDetailTable" style="margin-left:20px">
+                <thead>
+                    <tr>
+                        <th>选项</th>
+                        <th>跳题题目</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#  layui.each(editData.option_detail, function(index, item){ }}
+                    <tr>
+                        <td>{{item.title}}</td>
+                        <td width="300">
+                            <select class="targetItem" name="targetItem" lay-filter="targetItemSelect">
+                                <option value="-1" {{# if(item.gotoIndex){ }} selected  {{# } }}>请选择跳题题目</option>
+                                {{#  layui.each(d, function(dIndex, dItem){ }}
+                                <option value="{{dItem.index}}" {{# if(item.gotoIndex == dItem.index){ }} selected  {{# } }}>{{(dItem.index+1)}}: {{dItem.title}}</option>
+                                {{# }) }}
+                            </select>
+                        </td>
+                    </tr>
+                    {{# }) }}
+                </tbody>
+            </table>
+        </div>
+    </script>
+    <script src="layui/layui.js"></script>
+    <script src="jquery.min.js"></script>
+    <script>
+        var questionBank = [{
+                id:1,
+                title:"单选",
+                option_type:"1",
+                is_required:true,
+                option_detail:[
+                    {id:0,title:"甜",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                    {id:0,title:"咸",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                ]
+            },
+            {
+                id:2,
+                title:"多选",
+                option_type:"2",
+                option_detail:[
+                    {id:0,title:"甜",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                    {id:0,title:"咸",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                ]
+            },
+            {
+                id:3,
+                title:"输入框",
+                option_type:"11",
+                option_detail:[]
+            }]
+        var templateData = [
+            {
+                id:0,
+                title:"喜欢什么手机",//标题
+                option_type:"1",//问题类型
+                is_required:true,//是否必填
+                option_detail:[
+                    {
+                        id:0,
+                        title:"小米",//标题
+                        relation:0,//关联id
+                        relationIndex:2,//关联索引
+                        goto:0,//跳题id
+                        gotoIndex:-1,//跳题索引
+                    },
+                    {id:0,title:"华为",relation:0,relationIndex:3,goto:0,gotoIndex:-1},
+                ]
+            },
+            {
+                id:0,
+                title:"手机运营商",
+                option_type:"2",
+                is_required:true,
+                option_detail:[
+                    {id:0,title:"移动",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                    {id:0,title:"电信",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                ]
+            },
+            {
+                id:0,
+                title:"小米手机品牌",
+                option_type:"1",
+                is_required:true,
+                option_detail:[
+                    {id:0,title:"小米",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                    {id:0,title:"红米",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                ]
+            },
+            {
+                id:0,
+                title:"华为",
+                option_type:"1",
+                is_required:true,
+                option_detail:[
+                    {id:0,title:"mate",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                    {id:0,title:"普通",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                ]
+            },
+            {
+                id:0,
+                title:"跳题参考",
+                option_type:"1",
+                is_required:true,
+                option_detail:[
+                    {id:0,title:"跳到最后一题",relation:0,relationIndex:-1,goto:0,gotoIndex:6},
+                    {id:0,title:"咸",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                ]
+            },
+            {
+                id:0,
+                title:"豆腐脑甜还是咸",
+                option_type:"2",
+                option_detail:[
+                    {id:0,title:"甜",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                    {id:0,title:"咸",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                ]
+            },
+            {
+                id:0,
+                title:"家庭地址",
+                option_type:"11",
+                option_detail:[]
+            }
+        ]
+
+
+        templateList = [
+          {
+            id:0,
+            title:"关联模板",
+            data:[
+              {
+                id:0,
+                title:"喜欢什么手机",//标题
+                option_type:"1",//问题类型
+                is_required:true,//是否必填
+                option_detail:[
+                    {
+                        id:0,
+                        title:"小米",//标题
+                        relation:0,//关联id
+                        relationIndex:2,//关联索引
+                        goto:0,//跳题id
+                        gotoIndex:-1,//跳题索引
+                    },
+                    {id:0,title:"华为",relation:0,relationIndex:3,goto:0,gotoIndex:-1},
+                ]
+              },
+              {
+                  id:0,
+                  title:"手机运营商",
+                  option_type:"2",
+                  is_required:true,
+                  option_detail:[
+                      {id:0,title:"移动",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                      {id:0,title:"电信",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                  ]
+              },
+              {
+                  id:0,
+                  title:"小米手机品牌",
+                  option_type:"1",
+                  is_required:true,
+                  option_detail:[
+                      {id:0,title:"小米",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                      {id:0,title:"红米",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                  ]
+              },
+            ]
+          },
+          {
+            id:0,
+            title:"跳转",
+            data:[
+              {
+                id:0,
+                title:"喜欢什么手机",//标题
+                option_type:"1",//问题类型
+                is_required:true,//是否必填
+                option_detail:[
+                    {
+                        id:0,
+                        title:"小米",//标题
+                        relation:0,//关联id
+                        relationIndex:2,//关联索引
+                        goto:0,//跳题id
+                        gotoIndex:-1,//跳题索引
+                    },
+                    {id:0,title:"华为",relation:0,relationIndex:-1,goto:0,gotoIndex:2},
+                ]
+              },
+              {
+                  id:0,
+                  title:"手机运营商",
+                  option_type:"2",
+                  is_required:true,
+                  option_detail:[
+                      {id:0,title:"移动",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                      {id:0,title:"电信",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                  ]
+              },
+              {
+                  id:0,
+                  title:"小米手机品牌",
+                  option_type:"1",
+                  is_required:true,
+                  option_detail:[
+                      {id:0,title:"小米",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                      {id:0,title:"红米",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                  ]
+              },
+            ]
+          }
+        ]
+
+        var editIndex = -1;
+        var editData = {};
+        var addRowData = {
+            id:0,
+            title:"标题",
+            option_type:"1",
+            is_required:false,
+            option_detail:[
+                {id:0,title:"选项"},
+                {id:0,title:"选项"}
+            ]
+        }
+        var relationData = null;
+        layui.use(['element','laytpl','form'], function () {
+            element = layui.element;
+            laytpl = layui.laytpl;
+            form = layui.form;
+
+            questionTplRender()
+
+            form.on('select(relation)', function(data){
+                var value = data.value;
+                var row = {};
+                for(var i=0;i<questionBank.length;i++){
+                    var item = questionBank[i];
+                    if(item.id == value){
+                        row = $.extend(true,{},item);
+                    }
+                }
+                relationData = row;
+                questionRelationDetailTplRender(row);
+            });
+
+            form.on('select(option_type)', function(data){
+                editData.option_type = data.value;
+                if(data.value == 11){
+                    editData.detail = "";
+                    editData.option_detail = []
+                }else{
+                    editData.option_detail = [
+                        {id:0,title:"选项",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                        {id:0,title:"选项",relation:0,relationIndex:-1,goto:0,gotoIndex:-1},
+                    ]
+                }
+                questionDetailTplRender();
+            });
+
+            form.on('select(targetItemSelect)', function(data){
+                var val = data.value;
+                $('.targetItem').val(val)
+                form.render();
+            });
+            
+            
+            $('.btn .add').on('click',function(){
+                templateData.push($.extend(true,{},addRowData))
+                questionTplRender();
+            })
+            $(document).on('mouseenter','#question .item',function(){
+                $(this).addClass("itemHover").siblings().removeClass("itemHover")
+            }).on('mouseleave','#question .item',function(){
+                $(this).removeClass("itemHover")
+            })
+
+            $(document).on('click','#question .edit',function(){
+                var index = Number($(this).closest('.operation').attr('data-index'))
+                var row = templateData[index];
+                editIndex = index;
+                editData = $.extend(true,{},row);
+                questionEditTplRender(function(str){
+                    layer.open({
+                        type: 1,
+                        content: str,
+                        area: ['1000px', '80%'],
+                        btn: ['确认', '取消'],
+                        success:function(){
+                            questionDetailTplRender();
+                        },
+                        yes:function(index,layero){
+                            editData.is_required = $('#is_required').is(":checked")
+                            templateData[editIndex] = editData;
+                            questionTplRender();
+                            layer.close(index)
+                        }
+                    });
+                })
+            })
+
+            $(document).on('click','#question .add',function(){
+                var index = Number($(this).closest('.operation').attr('data-index'))
+                for(var i=0;i<templateData.length;i++){
+                    if(templateData.option_type != 11){
+                        for(var j=0;j<templateData[i].option_detail.length;j++){
+                            var item = templateData[i].option_detail[j]
+                            if(item.relationIndex > - 1 && item.relationIndex > index){
+                                item.relationIndex++
+                            }
+                            if(item.gotoIndex > -1 && item.gotoIndex > index){
+                                item.gotoIndex++
+                            }
+                        }
+                    }
+                }
+                templateData.splice(index + 1, 0, $.extend(true,{},addRowData));
+                questionTplRender();
+            })
+            
+            $(document).on('click','#question .delete',function(){
+                var index = Number($(this).closest('.operation').attr('data-index'))
+                for(var i=0;i<templateData.length;i++){
+                    if(templateData.option_type != 11){
+                        for(var j=0;j<templateData[i].option_detail.length;j++){
+                            var item = templateData[i].option_detail[j]
+                            if(item.relationIndex > - 1){
+                                if(item.relationIndex > index){
+                                    item.relationIndex--
+                                }else if(item.relationIndex == index){
+                                    item.relationIndex = -1
+                                }
+                            }
+                            if(item.gotoIndex > -1){
+                                if(item.gotoIndex > index){
+                                    item.gotoIndex--
+                                }else if(item.gotoIndex == index){
+                                    item.gotoIndex = -1
+                                }
+                            }
+                        }
+                    }
+                }
+                templateData.splice(index, 1);
+                questionTplRender();
+            })
+            
+            $(document).on('click','#question .moveUp',function(){
+                var index = Number($(this).closest('.operation').attr('data-index'))
+                if(index != 0){
+                    templateData[index] = templateData.splice(index-1, 1, templateData[index])[0];
+                }else{
+                    templateData.push(templateData.shift());
+                }
+                questionTplRender();
+            })
+
+            $(document).on('click','#question .moveDown',function(){
+                var index = Number($(this).closest('.operation').attr('data-index'))
+                if(index!=templateData.length-1){
+                    templateData[index] = templateData.splice(index+1, 1, templateData[index])[0];
+                }else{
+                    templateData.unshift( templateData.splice(index,1)[0]);
+                }
+                questionTplRender();
+            })
+
+
+            $(document).on('click','#question .relation',function(){
+                var rowIndex = Number($(this).closest('.operation').attr('data-index'))
+                relationData = $.extend(true,{},templateData[rowIndex]);
+
+                questionRelationTplRender(function(str){
+                    layer.open({
+                        title:"关联题库",
+                        type: 1,
+                        content: str,
+                        area: ['600px', '80%'],
+                        btn: ['确认', '取消'],
+                        success:function(){
+                            var row = {};
+                            if(relationData.id && relationData.id > 0){
+                                for(var i=0;i<questionBank.length;i++){
+                                    var item = questionBank[i];
+                                    if(item.id == relationData.id){
+                                        row = $.extend(true,{},item)
+                                        break;
+                                    }
+                                }
+                            }
+                            questionRelationDetailTplRender(row)
+                        },
+                        yes:function(index,layero){
+                            templateData[rowIndex] = relationData;
+                            layer.close(index)
+                            questionTplRender();
+                        }
+                    });
+                })
+                // questionTplRender();
+            })
+
+            $(document).on('click','#question .cancelRelation',function(){
+                var index = Number($(this).closest('.operation').attr('data-index'))
+                templateData[index] = $.extend(true,{},addRowData);;
+                questionTplRender();
+            })
+
+            $(document).on('blur','#questionDetail .layui-input',function(){
+                var index = $(this).closest('tr').index()
+                var val = $(this).val();
+                editData.option_detail[index].title = val;
+            })
+
+            $(document).on('blur','#questionDetail .layui-input',function(){
+                var index = $(this).closest('tr').index()
+                var val = $(this).val();
+                editData.option_detail[index].title = val;
+            })
+
+            $(document).on('blur','#title',function(){
+                var val = $(this).val();
+                editData.title = val;
+            })
+
+            $(document).on('click','#questionDetail .detailAdd',function(){
+                var index = $(this).closest('tr').index()
+                editData.option_detail.splice(index + 1, 0,{id:0,title:"选项",relation:0,relationIndex:-1,goto:0,gotoIndex:editData.option_detail[index].gotoIndex});
+                questionDetailTplRender();
+            })
+
+            $(document).on('click','#questionDetail .detailDelete',function(){
+                var index = $(this).closest('tr').index()
+                if(editData.option_detail.length == 1){
+                    layer.msg("唯一选项不能删除")
+                    return false;
+                }
+                editData.option_detail.splice(index, 1);
+                questionDetailTplRender();
+            })
+            
+            $(document).on('click','#questionDetail .detailMoveUp',function(){
+                var index = $(this).closest('tr').index()
+                var rows = editData.option_detail
+                if(index != 0){
+                    rows[index] = rows.splice(index-1, 1, rows[index])[0];
+                }else{
+                    rows.push(rows.shift());
+                }
+                questionDetailTplRender();
+            })
+
+            $(document).on('click','#questionDetail .detailMoveDown',function(){
+                var index = $(this).closest('tr').index()
+                var rows = editData.option_detail
+                if(index!=editData.length-1){
+                    rows[index] = rows.splice(index+1, 1, rows[index])[0];
+                }else{
+                    rows.unshift( rows.splice(index,1)[0]);
+                }
+                questionDetailTplRender();
+            })
+
+            //弹窗  开始
+            $(document).on('click','.contactItem',function(){
+                if(editIndex == templateData.length -1){
+                    layer.msg("最后一题不能关联");
+                    return false;
+                }
+                if(editData.option_type == 11){
+                    layer.msg("填空题不能关联");
+                    return false;
+                }
+
+                var copyData = $.extend(true,[],templateData);
+                for(var i=0;i<copyData.length;i++){
+                    var item = copyData[i];
+                    item.index = i;
+                }
+                copyData = copyData.slice(editIndex+1,copyData.length)
+                
+                
+                var getTpl = detailContactTpl.innerHTML
+                laytpl(getTpl).render(copyData, function(html){
+                    layer.open({
+                        type: 1,
+                        title:"关联设置",
+                        content: html,
+                        area: ['800px', '600px'],
+                        btn: ['确认', '取消'],
+                        success:function(){
+                            form.render();
+                        },
+                        yes:function(layerIndex,layero){
+                            var items = layero.find('.targetItem');
+                            for(var i=0;i<items.length;i++){
+                                editData.option_detail[i].relationIndex = items.eq(i).val()
+                            }
+                            layer.close(layerIndex)
+                        }
+                    });
+                });
+            })
+
+
+            $(document).on('click','.jumpItem',function(){
+                if(editIndex == templateData.length -1){
+                    layer.msg("最后一题不能跳题");
+                    return false;
+                }
+                if(editData.option_type == 11){
+                    layer.msg("填空题不能跳题");
+                    return false;
+                }
+
+                var copyData = $.extend(true,[],templateData);
+                for(var i=0;i<copyData.length;i++){
+                    var item = copyData[i];
+                    item.index = i;
+                }
+                copyData = copyData.slice(editIndex+1,copyData.length)
+                
+                
+                var getTpl = detailJumpItemTpl.innerHTML
+                laytpl(getTpl).render(copyData, function(html){
+                    layer.open({
+                        type: 1,
+                        title:"跳题设置",
+                        content: html,
+                        area: ['800px', '600px'],
+                        btn: ['确认', '取消'],
+                        success:function(){
+                            form.render();
+                        },
+                        yes:function(layerIndex,layero){
+                            var items = layero.find('.targetItem');
+                            for(var i=0;i<items.length;i++){
+                                editData.option_detail[i].gotoIndex = items.eq(i).val()
+                            }
+                            layer.close(layerIndex)
+                        }
+                    });
+                });
+            })
+
+            function questionRelationTplRender(callback){
+                var getTpl = questionRelationTpl.innerHTML
+                laytpl(getTpl).render(relationData, function(html){
+                    callback && callback(html)
+                });
+            }
+
+            function questionRelationDetailTplRender(data){
+                var getTpl = questionRelationDetailTpl.innerHTML,
+                view = document.getElementById('questionRelationDetail');
+                laytpl(getTpl).render(data, function(html){
+                    view.innerHTML = html;
+                    form.render();
+                });
+            }
+
+            function questionEditTplRender(callback){
+                var getTpl = questionEditTpl.innerHTML,
+                view = document.getElementById('questionEdit');
+                laytpl(getTpl).render(editData, function(html){
+                    callback && callback(html)
+                });
+            }
+
+            function questionDetailTplRender(){
+                var getTpl = questionDetailTpl.innerHTML,
+                view = document.getElementById('questionDetail');
+                laytpl(getTpl).render(editData, function(html){
+                    view.innerHTML = html;
+                    form.render();
+                });
+            }
+
+            function questionTplRender(){
+                var getTpl = questionTpl.innerHTML,
+                view = document.getElementById('question');
+                laytpl(getTpl).render(templateData, function(html){
+                    view.innerHTML = html;
+                    form.render();
+                });
+            }
+
+
+            $('.export').on('click',function(){
+              var html = "<div class='layui-form' style='padding:20px;'><select id='selectTemplate'>"
+              for(var i=0;i<templateList.length;i++){
+                html += "<option value='" + i +"'>" + templateList[i].title +"</option>"
+              }
+              html += "</select></div>"
+              layer.open({
+                  type: 1,
+                  title:"选择模板",
+                  content: html,
+                  btn: ['确认', '取消'],
+                  success:function(layero){
+                    layero.children('.layui-layer-content').css("overflow","initial")
+                    form.render();
+                  },
+                  yes:function(layerIndex,layero){
+                      var rows = $.extend(true,[],templateList[$('#selectTemplate').val()].data);
+                      var len = templateData.length;
+
+                      for(var i=0;i<rows.length;i++){
+                        if(rows.option_type != 11){
+                            for(var j=0;j<rows[i].option_detail.length;j++){
+                                var item = rows[i].option_detail[j]
+                                if(item.relationIndex > - 1){
+                                  item.relationIndex += len
+                                }
+                                if(item.gotoIndex > -1){
+                                  item.gotoIndex += len
+                                }
+                            }
+                        }
+                      }
+                      templateData = templateData.concat(rows)
+                      questionTplRender();
+
+                      layer.close(layerIndex)
+                  }
+              });
+            })
+        });
+
+
+        
+
+    </script>
+</body>
+
+</html>
