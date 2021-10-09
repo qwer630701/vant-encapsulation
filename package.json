@@ -1,6 +1,6 @@
 {
-  "name": "mobile-fe",
-  "version": "0.1.0",
+  "name": "vant-encapsulation",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
