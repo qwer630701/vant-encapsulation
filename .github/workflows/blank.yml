@@ -10,6 +10,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2.3.4
         with:
+          persist-credentials: false
+
       - uses: actions/cache@v2.1.6
         id: node-modules
         with:
