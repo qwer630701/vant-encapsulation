@@ -1,5 +1,5 @@
 name: vant-encapsulation-page
-on:
+on: 
   push:
     branches:
       - master
@@ -10,10 +10,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@master
 
-    - name: Build and Deploy
-      uses: JamesIves/github-pages-deploy-action@master
+    - name: vuepress-deploy
+      uses: jenkey2011/vuepress-deploy@master
       env:
-        ACCESS_TOKEN: ${{ secrets.SYY }}
-        BRANCH: page
-        FOLDER: build
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        TARGET_REPO: username/repo
+        TARGET_BRANCH: page
         BUILD_SCRIPT: npm install && npm run build
+        BUILD_DIR: dist/
