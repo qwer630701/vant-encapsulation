@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    1233366222556634534523423423345345345435134534523423432123123
     <keep-alive>
       <router-view />
     </keep-alive>
