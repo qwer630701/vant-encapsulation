@@ -6,12 +6,12 @@ jobs:
   steps:
 
     - name: Checkout
-    uses: actions/checkout@v1
+    uses: actions/qwer630701
 
     - name: Build and Deploy
     uses: JamesIves/github-pages-deploy-action@releases/v2
     env:
     ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-    BRANCH: gh-pages
+    BRANCH: page
     FOLDER: docs
     BUILD_SCRIPT: npm install && npm run build
