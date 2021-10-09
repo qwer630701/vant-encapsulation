@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    12333
+    1233366
     <keep-alive>
       <router-view />
     </keep-alive>
