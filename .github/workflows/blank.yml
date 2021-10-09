@@ -1,8 +1,6 @@
 name: vant-encapsulation-page
 on: 
-  push:
-    branches:
-      - master
+  push
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
